@@ -10,10 +10,12 @@ AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN")
 if not DATABASE_URL or not AUTH_TOKEN:
     raise RuntimeError("Turso environment variables are not set")
 
-client = libsql_client.create_client_sync(
-    url=DATABASE_URL,
-    auth_token=AUTH_TOKEN,
-)
-
 def get_db():
+    print("Creating DB connection...") 
+    client = libsql_client.create_client_sync(
+        url=DATABASE_URL,
+        auth_token=AUTH_TOKEN,
+    )
+
+    print("DB connection established.")
     return client

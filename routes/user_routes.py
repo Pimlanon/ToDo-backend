@@ -13,6 +13,7 @@ def create_user():
 
 @user_bp.get("")
 def get_users():
+    print("Reached /api/users endpoint")
     users = service.get_users()
     return jsonify([u.to_dict() for u in users])
 
