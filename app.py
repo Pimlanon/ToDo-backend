@@ -48,7 +48,3 @@ def handle_all_errors(e):
 @app.route("/")
 def home():
     return "Turso + Flask is working!"
-    
-
-if __name__ == "__main__":
-    app.run(debug=True)
