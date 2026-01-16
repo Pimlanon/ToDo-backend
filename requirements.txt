@@ -6,3 +6,4 @@ bcrypt
 Werkzeug==3.1.5
 gunicorn
 Flask-Cors
+email-validator
