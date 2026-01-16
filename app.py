@@ -1,10 +1,12 @@
 from flask import Flask, jsonify, Blueprint
+from flask_cors import CORS
 from routes.user_routes import user_bp
 from werkzeug.exceptions import HTTPException
 import traceback
 from pydantic import ValidationError
 
 app = Flask(__name__)
+CORS(app)
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 
 api_bp.register_blueprint(user_bp, url_prefix="/users")
