@@ -4,6 +4,9 @@ import libsql_client
 
 load_dotenv()
 
+print("URL:", os.getenv("TURSO_DATABASE_URL"))
+print("TOKEN:", os.getenv("TURSO_AUTH_TOKEN")[:10], "...")
+
 DATABASE_URL = os.getenv("TURSO_DATABASE_URL")
 AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN")
 
