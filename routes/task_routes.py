@@ -18,9 +18,5 @@ def get_tasks():
 
 @task_bp.delete("/<id>")
 def delete_task(id):
-    task = service.delete_task(id)
-
-    if not task:
-        return jsonify({"message": "Task not found"}), 404
-
+    service.delete_task(id)
     return jsonify({"message": "Task deleted successfully"}), 200

@@ -4,7 +4,7 @@ from datetime import datetime
 from schemas.user_schema import UserCreate
 from services.page_service import PageService
 from utilities.password import hash_password
-from errors import ConflictError, InternalError
+from errors import ConflictError, InternalError, NotFoundError
 import uuid
 
 repo = UserRepository()
@@ -42,13 +42,15 @@ class UserService:
 
     def get_user(self, user_id):
         user = repo.find_by_id(user_id)
+        if not user:
+            raise NotFoundError("User not found")
         return  user
 
     def delete_user(self, user_id):
         # check if user exist
         user = repo.find_by_id(user_id)
         if not user:
-            return None
+            raise NotFoundError("User not found")
 
         repo.delete(user_id)
         return user

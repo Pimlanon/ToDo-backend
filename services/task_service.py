@@ -4,6 +4,7 @@ from models.task_model import Task
 from repositories.relation_repo import RelationRepository
 import uuid
 from datetime import datetime
+from errors import NotFoundError
 
 repo = TaskRepository()
 relation_repo = RelationRepository()
@@ -32,8 +33,11 @@ class TaskService:
         # check if task exist
         task = repo.find_by_id(task_id)
         if not task:
-            return None
+            raise NotFoundError("Task not found")
 
+        # delete relations by task_id
         relation_repo.delete_by_task(task_id)
+
+        # delete task
         repo.delete(task_id)
         return task

@@ -6,6 +6,7 @@ from errors import AppError
 from routes.user_routes import user_bp
 from routes.task_routes import task_bp
 from routes.page_routes import page_bp
+from routes.connection_routes import connection_bp
 
 app = Flask(__name__)
 
@@ -16,16 +17,18 @@ api_bp = Blueprint("api", __name__, url_prefix="/api")
 api_bp.register_blueprint(user_bp, url_prefix="/users")
 api_bp.register_blueprint(task_bp, url_prefix="/tasks")
 api_bp.register_blueprint(page_bp, url_prefix="/pages")
+api_bp.register_blueprint(connection_bp, url_prefix="/connections")
 app.register_blueprint(api_bp)
 
 # handle error (pydantic)
 @app.errorhandler(ValidationError)
 def handle_validation_error(e):
     first = e.errors()[0]
+    field = first["loc"][0] # filed name : status, title
+    msg = first["msg"] # message : Field required
     return jsonify({
         "code": 400,
-        "field": first["loc"][0],
-        "error": first["msg"]
+        "error": f"{msg} {field}" # output: Field required status
     }), 400
 
 # custom error

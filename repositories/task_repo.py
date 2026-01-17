@@ -16,10 +16,14 @@ class TaskRepository:
         db = get_db()
         result = db.execute("SELECT * FROM tasks")
         columns = result.columns
-        return [
-            Task(**dict(zip(columns, row)))
-            for row in result.rows
-        ]
+        tasks = []
+
+        for row in result.rows:
+            data = dict(zip(columns, row))
+            tasks.append(Task(**data))
+
+        return tasks
+
     
     def find_by_id(self, task_id: str):
         db = get_db()
