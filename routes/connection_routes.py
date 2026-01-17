@@ -14,7 +14,7 @@ def create_connection():
 @connection_bp.get("/<id>")
 def get_connections(id):
     connections = service.get_connections(id)
-    return jsonify(connections), 200
+    return jsonify(connections)
 
 @connection_bp.delete("/<id>")
 def delete_connection(id):

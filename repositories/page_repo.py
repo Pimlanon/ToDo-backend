@@ -9,6 +9,16 @@ class PageRepository:
             INSERT INTO pages (id,  user_id, title, created_at)
             VALUES (?, ?, ?, ?)
         """, [page.id, page.user_id, page.title, page.created_at])
+    
+    def find_all_by_user(self, user_id :str):
+        db = get_db()
+        result = db.execute("""
+            SELECT * FROM pages
+            WHERE user_id = ?
+            ORDER BY created_at ASC
+        """, [user_id])
+
+        return [Page(**dict(zip(result.columns, row))) for row in result.rows]
 
     def find_by_page_user(self, page_id: str, user_id :str):
         db = get_db()

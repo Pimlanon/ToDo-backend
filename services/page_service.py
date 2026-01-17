@@ -16,6 +16,13 @@ class PageService:
         )
         repo.create(page)
         return page
+    
+    def get_all_by_user(self, user_id :str):
+        pages = repo.find_all_by_user(user_id)
+        return {
+            "count": len(pages),
+            "items": [p.to_dict() for p in pages]
+        }
 
     def get_tasks_with_connections(self, page_id: str, user_id: str):
         rows = repo.find_by_page_user(page_id, user_id)
