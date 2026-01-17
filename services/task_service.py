@@ -22,3 +22,15 @@ class TaskService:
         )
         repo.create(task)
         return task
+    
+    def get_tasks(self):
+        return repo.find_all()
+    
+    def delete_task(self, task_id):
+        # check if task exist
+        task = repo.find_by_id(task_id)
+        if not task:
+            return None
+
+        repo.delete(task_id)
+        return task
