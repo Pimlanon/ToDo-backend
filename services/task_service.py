@@ -1,10 +1,12 @@
 from repositories.task_repo import TaskRepository
 from schemas.task_schema import TaskCreate
 from models.task_model import Task
+from repositories.relation_repo import RelationRepository
 import uuid
 from datetime import datetime
 
 repo = TaskRepository()
+relation_repo = RelationRepository()
 
 class TaskService:
 
@@ -32,5 +34,6 @@ class TaskService:
         if not task:
             return None
 
+        relation_repo.delete_by_task(task_id)
         repo.delete(task_id)
         return task
