@@ -3,12 +3,20 @@ from models.page_model import Page
 
 class PageRepository:
 
-    def create(self, page: Page ):
+    def create(self, page: Page):
         db = get_db()
         db.execute("""
             INSERT INTO pages (id,  user_id, title, created_at)
             VALUES (?, ?, ?, ?)
         """, [page.id, page.user_id, page.title, page.created_at])
+
+    def update_title(self, page_id:  str, title: str):
+        db = get_db()
+        db.execute("""
+            UPDATE pages
+            SET title = ?
+            WHERE id = ?
+        """, [title, page_id])
     
     def find_all_by_user(self, user_id :str):
         db = get_db()
@@ -27,7 +35,6 @@ class PageRepository:
                 t.id,
                 t.title,
                 t.status,
-                t.position,
                 t.description,
                 t.priority,
                 t.due_date,

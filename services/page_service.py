@@ -17,6 +17,9 @@ class PageService:
         repo.create(page)
         return page
     
+    def update_title(self, page_id: str, title: str):
+        return repo.update_title(page_id, title)
+    
     def get_all_by_user(self, user_id :str):
         pages = repo.find_all_by_user(user_id)
         return {
@@ -37,7 +40,6 @@ class PageService:
                     "id": row["id"],
                     "title": row["title"],
                     "status": row["status"],
-                    "position": row["position"],
                     "description": row["description"],
                     "priority": row["priority"],
                     "due_date": row["due_date"],
