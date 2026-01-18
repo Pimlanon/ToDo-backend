@@ -17,7 +17,6 @@ class TaskService:
             page_id=data.page_id,
             title=data.title,
             status=data.status,
-            position=data.position,
             created_at=datetime.utcnow().isoformat(),
             description=data.description,
             priority=data.priority,

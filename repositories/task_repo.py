@@ -6,9 +6,9 @@ class TaskRepository:
     def create(self, task: Task):
         db = get_db()
         response = db.execute("""
-            INSERT INTO tasks (id, page_id, title, status, position, created_at, description, priority, due_date)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, [task.id, task.page_id, task.title, task.status, task.position, task.created_at, task.description, task.priority, task.due_date])
+            INSERT INTO tasks (id, page_id, title, status, created_at, description, priority, due_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, [task.id, task.page_id, task.title, task.status, task.created_at, task.description, task.priority, task.due_date])
         print(f'response: {response}')
         return 'task'
 
