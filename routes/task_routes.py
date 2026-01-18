@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from services.task_service import TaskService
-from schemas.task_schema import TaskCreate
+from schemas.task_schema import TaskCreate, TaskUpdate
 
 task_bp = Blueprint("tasks", __name__)
 service = TaskService()
@@ -10,6 +10,12 @@ def create_task():
     payload = TaskCreate.model_validate(request.json)
     task = service.create_task(payload)
     return jsonify(task.to_dict()), 201
+
+@task_bp.put("/<task_id>")
+def update_task(task_id):
+    payload = TaskUpdate.model_validate(request.json)
+    task = service.update_task(task_id, payload)
+    return jsonify(task.to_dict())
 
 @task_bp.get("")
 def get_tasks():

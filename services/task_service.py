@@ -1,5 +1,5 @@
 from repositories.task_repo import TaskRepository
-from schemas.task_schema import TaskCreate
+from schemas.task_schema import TaskCreate, TaskUpdate
 from models.task_model import Task
 from repositories.relation_repo import RelationRepository
 import uuid
@@ -18,11 +18,30 @@ class TaskService:
             title=data.title,
             status=data.status,
             created_at=datetime.utcnow().isoformat(),
+            updated_at=datetime.utcnow().isoformat(),
             description=data.description,
             priority=data.priority,
             due_date=data.due_date,
         )
         repo.create(task)
+        return task
+    
+    def update_task(self, task_id: str, data: TaskUpdate):
+        # get exisitng data
+        old_task = repo.find_by_id(task_id)
+
+        task = Task(
+            id=task_id,
+            page_id=data.page_id,
+            title=data.title,
+            status=data.status,
+            created_at=old_task.created_at,
+            updated_at=datetime.utcnow().isoformat(),
+            description=data.description,
+            priority=data.priority,
+            due_date=data.due_date,
+        )
+        repo.update(task)
         return task
     
     def get_tasks(self):
