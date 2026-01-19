@@ -6,9 +6,9 @@ class ConnectionRepository:
     def create(self, connection: Connection):
         db = get_db()
         db.execute("""
-            INSERT INTO connections (id, page_id, name, email, created_at)
-            VALUES (?, ?, ?, ?, ?)
-        """, [connection.id, connection.page_id, connection.name, connection.email, connection.created_at])
+            INSERT INTO connections (id, page_id, name, email, color, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, [connection.id, connection.page_id, connection.name, connection.email, connection.color, connection.created_at])
 
     def exists_by_page_and_email(self, page_id: str, email: str) -> bool:
         db = get_db()
@@ -25,6 +25,7 @@ class ConnectionRepository:
         result = db.execute("""
             SELECT * FROM connections
             WHERE page_id = ?
+            ORDER BY name COLLATE NOCASE ASC;
         """, [page_id])
         columns = result.columns
         connections = []

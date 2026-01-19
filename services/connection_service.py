@@ -19,6 +19,7 @@ class ConnectionService:
             page_id=data.page_id,
             name=data.name,
             email=data.email,
+            color=data.color,
             created_at=datetime.utcnow().isoformat()
         )
         repo.create(connection)
