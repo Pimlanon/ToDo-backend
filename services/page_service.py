@@ -1,10 +1,10 @@
 from repositories.page_repo import PageRepository
 from models.page_model import Page
 import uuid
-from datetime import datetime
 import json
 from pathlib import Path
 from datetime import datetime, timezone
+from config import TH_TZ
 
 repo = PageRepository()
 
@@ -39,8 +39,13 @@ class PageService:
     def _is_overdue(self, task, today):
         if not task.get("due_date"):
             return False
-        due = datetime.fromisoformat(task["due_date"].replace("Z", "+00:00"))
-        return (today > due) and (task["status"] != 3) # not include 'done' 
+        due_utc = datetime.fromisoformat(task["due_date"].replace("Z", "+00:00"))
+
+        # Convert to Thailand time
+        due_local = due_utc.astimezone(TH_TZ).date()
+        today_local = today.astimezone(TH_TZ).date()
+
+        return (today_local  > due_local) and (task["status"] != 3) # not include 'done' 
 
     def _load_json_tasks(self) :
         BASE_DIR = Path(__file__).resolve().parent.parent  # location: parent-folder/

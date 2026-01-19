@@ -3,8 +3,9 @@ from schemas.task_schema import TaskCreate, TaskUpdate
 from models.task_model import Task
 from repositories.relation_repo import RelationRepository
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from errors import NotFoundError
+from config import TH_TZ
 
 repo = TaskRepository()
 relation_repo = RelationRepository()
@@ -73,6 +74,61 @@ class TaskService:
     
     def get_tasks(self):
         return repo.find_all()
+    
+    def get_today_overdue_tasks(self, page_id: str):
+        rows = repo.find_today_overdue_tasks(page_id)
+
+        today_utc = datetime.now(timezone.utc)
+        today_local = today_utc.astimezone(TH_TZ).date()
+
+        today_tasks = {"todo": [], "in_progress": []}
+        overdue_tasks = {"todo": [], "in_progress": []}
+
+        for row in rows:
+            task = {
+                "id": row["id"],
+                "title": row["title"],
+                "status": row["status"],
+                "due_date": row["due_date"]
+            }
+
+            due_utc = datetime.fromisoformat(task["due_date"].replace("Z", "+00:00"))
+            due_local = due_utc.astimezone(TH_TZ).date()
+        
+            # categorize by date
+            if due_local == today_local:
+                category = today_tasks
+            else:  # due < today (overdue)
+                category = overdue_tasks
+            
+            # add tostatus
+            if task["status"] == 1:
+                category["todo"].append(task)
+            elif task["status"] == 2:
+                category["in_progress"].append(task)
+
+        return {
+            "today": {
+                "todo": {
+                    "count": len(today_tasks["todo"]),
+                    "items": today_tasks["todo"]
+                },
+                "in_progress": {
+                    "count": len(today_tasks["in_progress"]),
+                    "items": today_tasks["in_progress"]
+                }
+            },
+            "overdue": {
+                "todo": {
+                    "count": len(overdue_tasks["todo"]),
+                    "items": overdue_tasks["todo"]
+                },
+                "in_progress": {
+                    "count": len(overdue_tasks["in_progress"]),
+                    "items": overdue_tasks["in_progress"]
+                }
+            }
+        }
     
     def delete_task(self, task_id):
         # check if task exist

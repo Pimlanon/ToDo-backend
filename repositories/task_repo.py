@@ -1,5 +1,6 @@
 from db import get_db
 from models.task_model import Task
+from datetime import datetime, timezone
 
 class TaskRepository: 
 
@@ -43,6 +44,33 @@ class TaskRepository:
         data = dict(zip(columns, row))
 
         return Task(**data)
+    
+    def find_today_overdue_tasks(self, page_id: str):
+        db = get_db()
+        today = datetime.now(timezone.utc).date().isoformat()
+
+        result = db.execute("""
+            SELECT 
+                id,
+                title,
+                status,
+                due_date
+            FROM tasks 
+            WHERE page_id = ? 
+            AND status IN (1, 2)
+            AND due_date IS NOT NULL
+            AND due_date <= ?
+            ORDER BY due_date ASC, created_at DESC
+        """, [page_id, today])
+
+        columns = result.columns
+        tasks = []
+
+        for row in result.rows:
+            data = dict(zip(columns, row))
+            tasks.append(data)
+        
+        return tasks
 
     def delete(self, task_id: str):
         db = get_db()

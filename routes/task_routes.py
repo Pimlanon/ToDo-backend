@@ -22,6 +22,11 @@ def get_tasks():
     tasks = service.get_tasks()
     return jsonify([t.to_dict() for t in tasks])
 
+@task_bp.get("/sidebar/<page_id>")
+def get_today_overdue_tasks(page_id):
+    tasks = service.get_today_overdue_tasks(page_id)
+    return jsonify(tasks)
+
 @task_bp.delete("/<id>")
 def delete_task(id):
     service.delete_task(id)
