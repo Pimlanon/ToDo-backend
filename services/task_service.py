@@ -75,6 +75,30 @@ class TaskService:
     def get_tasks(self):
         return repo.find_all()
     
+    def _build_today_overdue_tasks(self, today_tasks, overdue_tasks, limit_overdue=3):
+        return {
+            "today": {
+                "todo": {
+                    "count": len(today_tasks["todo"]),
+                    "items": today_tasks["todo"]
+                },
+                "in_progress": {
+                    "count": len(today_tasks["in_progress"]),
+                    "items": today_tasks["in_progress"]
+                }
+            },
+            "overdue": {
+                "todo": {
+                    "count": len(overdue_tasks["todo"]),
+                    "items": overdue_tasks["todo"][:limit_overdue]
+                },
+                "in_progress": {
+                    "count": len(overdue_tasks["in_progress"]),
+                    "items": overdue_tasks["in_progress"][:limit_overdue]
+                }
+            }
+        }
+    
     def get_today_overdue_tasks(self, page_id: str):
         rows = repo.find_today_overdue_tasks(page_id)
 
@@ -107,28 +131,7 @@ class TaskService:
             elif task["status"] == 2:
                 category["in_progress"].append(task)
 
-        return {
-            "today": {
-                "todo": {
-                    "count": len(today_tasks["todo"]),
-                    "items": today_tasks["todo"]
-                },
-                "in_progress": {
-                    "count": len(today_tasks["in_progress"]),
-                    "items": today_tasks["in_progress"]
-                }
-            },
-            "overdue": {
-                "todo": {
-                    "count": len(overdue_tasks["todo"]),
-                    "items": overdue_tasks["todo"][:3]  # only first 3
-                },
-                "in_progress": {
-                    "count": len(overdue_tasks["in_progress"]),
-                    "items": overdue_tasks["in_progress"][:3]  # only first 3
-                }
-            }
-        }
+        return self._build_today_overdue_tasks(today_tasks, overdue_tasks)
     
     def delete_task(self, task_id):
         # check if task exist
