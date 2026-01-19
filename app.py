@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, Blueprint
 from flask_cors import CORS
-from werkzeug.exceptions import HTTPException
 from pydantic import ValidationError
 from errors import AppError
 from routes.user_routes import user_bp

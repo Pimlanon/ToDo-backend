@@ -8,9 +8,10 @@ class TaskBase(BaseModel):
     description: Optional[str] = None
     priority: Optional[int] = None
     due_date: Optional[str] = None
+    connection_ids: Optional[list[str]] = []
 
     class Config:
-        anystr_strip_whitespcae = True # strip whitespace from all str fields
+        str_strip_whitespace = True # strip whitespace from all str fields
 
 class TaskCreate(TaskBase):
     pass

@@ -41,7 +41,8 @@ class PageRepository:
                 t.created_at,
                 c.id    AS connection_id,
                 c.name   AS connection_name,
-                c.email  AS connection_email
+                c.email  AS connection_email,
+                c.color AS connection_color
             FROM tasks t
             JOIN pages p 
                 ON t.page_id = p.id

@@ -2,6 +2,9 @@ from repositories.page_repo import PageRepository
 from models.page_model import Page
 import uuid
 from datetime import datetime
+import json
+from pathlib import Path
+from datetime import datetime, timezone
 
 repo = PageRepository()
 
@@ -11,7 +14,7 @@ class PageService:
         page = Page(
             id=str(uuid.uuid4()),
             user_id=user_id,
-            title="My First Board",
+            title="Edit Your Board's Name Here !",
             created_at=datetime.utcnow().isoformat(),
         )
         repo.create(page)
@@ -26,12 +29,34 @@ class PageService:
             "count": len(pages),
             "items": [p.to_dict() for p in pages]
         }
+    
+    def is_overdue(self, task, today):
+        if not task.get("due_date"):
+            return False
+        due = datetime.fromisoformat(task["due_date"].replace("Z", "+00:00"))
+        return (today > due) and (task["status"] != 3) # not include 'done' 
 
     def get_tasks_with_connections(self, page_id: str, user_id: str):
-        rows = repo.find_by_page_user(page_id, user_id)
 
+        BASE_DIR = Path(__file__).resolve().parent.parent  # location: parent-folder/
+        JSON_PATH = BASE_DIR / "data" / "tasks.json" # parent-folder/data/tasks.json
+      
+        # load json
+        with open(JSON_PATH, "r", encoding="utf-8") as f:
+            json_tasks = json.load(f)
+
+        # setup tasks
         tasks = {}
 
+        # put json data to tasks 
+        for t in json_tasks:
+            tasks[t["id"]] = {
+                **t,
+                "connections": []
+            }
+
+        # ---- data from DB ---
+        rows = repo.find_by_page_user(page_id, user_id)
         for row in rows:
             task_id = row["id"]
 
@@ -52,17 +77,25 @@ class PageService:
                 tasks[task_id]["connections"].append({
                     "id": row["connection_id"],
                     "name": row["connection_name"],
-                    "email": row["connection_email"]
+                    "email": row["connection_email"],
+                    "color": row["connection_color"]
                 })
-            
-        # separate by status 1:todo, 2:in_progress, 3:done
+        
+        # prepare status + set today
         map_status = {
             "todo": [],
             "in_progress": [],
             "done": []
         }
+        today = datetime.now(timezone.utc) 
 
+        # group by status + overdue
         for task in tasks.values():
+
+            # check overdue task
+            task["over_due"] = self.is_overdue(task, today)
+
+            # separate by status + merge to same 'map_status'
             if task["status"] == 1:
                 map_status["todo"].append(task)
             elif task["status"] == 2:

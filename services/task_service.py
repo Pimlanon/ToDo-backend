@@ -23,7 +23,14 @@ class TaskService:
             priority=data.priority,
             due_date=data.due_date,
         )
+        # create task
         repo.create(task)
+
+        # create relations with connection
+        if data.connection_ids:
+            for cid in data.connection_ids:
+                relation_repo.create(task.id, cid)
+
         return task
     
     def update_task(self, task_id: str, data: TaskUpdate):
@@ -42,6 +49,26 @@ class TaskService:
             due_date=data.due_date,
         )
         repo.update(task)
+
+        # -- connection --
+        # existing id from db
+        old_ids = set(relation_repo.find_by_task_id(task_id))
+        # connection id from user
+        new_ids = set(data.connection_ids or [])
+
+        # find new id (insert new row)
+        to_add = new_ids - old_ids
+        # find remove id (delete in db)
+        to_delete = old_ids - new_ids
+
+        # create new connection
+        for cid in to_add:
+            relation_repo.create(task_id, cid)
+
+        # delete non-existing extension
+        for cid in to_delete:
+            relation_repo.delete(task_id, cid)
+
         return task
     
     def get_tasks(self):
