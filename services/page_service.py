@@ -10,6 +10,12 @@ repo = PageRepository()
 
 class PageService:
 
+    STATUS_MAP = {
+        1: "todo",
+        2: "in_progress", 
+        3: "done"
+    }
+
     def create_page(self, user_id: str):
         page = Page(
             id=str(uuid.uuid4()),
@@ -30,36 +36,47 @@ class PageService:
             "items": [p.to_dict() for p in pages]
         }
     
-    def is_overdue(self, task, today):
+    def _is_overdue(self, task, today):
         if not task.get("due_date"):
             return False
         due = datetime.fromisoformat(task["due_date"].replace("Z", "+00:00"))
         return (today > due) and (task["status"] != 3) # not include 'done' 
 
-    def get_tasks_with_connections(self, page_id: str, user_id: str):
-
+    def _load_json_tasks(self) :
         BASE_DIR = Path(__file__).resolve().parent.parent  # location: parent-folder/
         JSON_PATH = BASE_DIR / "data" / "tasks.json" # parent-folder/data/tasks.json
-      
-        # load json
+
         with open(JSON_PATH, "r", encoding="utf-8") as f:
             json_tasks = json.load(f)
-
-        # setup tasks
-        tasks = {}
-
-        # put json data to tasks 
-        for t in json_tasks:
-            tasks[t["id"]] = {
-                **t,
-                "connections": []
-            }
-
-        # ---- data from DB ---
-        rows = repo.find_by_page_user(page_id, user_id)
-        for row in rows:
+        
+        return {
+            task["id"]: {**task, "connections": []} 
+            for task in json_tasks
+        }
+    
+    def _build_connection(self, row) :
+        # build connection obj from db
+        return {
+            "id": row["connection_id"],
+            "name": row["connection_name"],
+            "email": row["connection_email"],
+            "color": row["connection_color"]
+        }
+    
+    def _merge_db_tasks(self, tasks, db_rows) -> None:
+        # merge tasks + connections 
+        # return
+        #      {
+        #         "a1b2c3d <id_task>": {
+        #           "id": str <id_task>,
+        #            ...
+        #           "connections": [{...}]
+        #        }
+        #     }
+        for row in db_rows:
             task_id = row["id"]
-
+            
+            # create task if doesn't exist
             if task_id not in tasks:
                 tasks[task_id] = {
                     "id": row["id"],
@@ -71,54 +88,58 @@ class PageService:
                     "created_at": row["created_at"],
                     "connections": []
                 }
-
-            # add connection if exist
+            
+            # add connection if exists
             if row["connection_id"]:
-                tasks[task_id]["connections"].append({
-                    "id": row["connection_id"],
-                    "name": row["connection_name"],
-                    "email": row["connection_email"],
-                    "color": row["connection_color"]
-                })
-        
-        # prepare status + set today
-        map_status = {
-            "todo": [],
-            "in_progress": [],
-            "done": []
-        }
-        today = datetime.now(timezone.utc) 
+                tasks[task_id]["connections"].append(
+                    self._build_connection(row)
+                )
 
-        # group by status + overdue
+    def _group_by_status(self, tasks, today) :
+        # group by status + mark overdue 
+        # return
+        #      {
+        #         "todo": [{...}],
+        #         "in_progress": [...]},
+        #         "done": [...]}
+        #     }
+        grouped = {status: [] for status in self.STATUS_MAP.values()}
+        
         for task in tasks.values():
-
-            # check overdue task
-            task["over_due"] = self.is_overdue(task, today)
-
-            # separate by status + merge to same 'map_status'
-            if task["status"] == 1:
-                map_status["todo"].append(task)
-            elif task["status"] == 2:
-                map_status["in_progress"].append(task)
-            elif task["status"] == 3:
-                map_status["done"].append(task)
+            task["over_due"] = self._is_overdue(task, today)
+            
+            status_key = self.STATUS_MAP.get(task["status"])
+            if status_key:
+                grouped[status_key].append(task)
         
-        # count tasks in each status
-        result = {
-            "todo": {
-                "count": len(map_status["todo"]),
-                "items": map_status["todo"]
-            },
-            "in_progress": {
-                "count": len(map_status["in_progress"]),
-                "items": map_status["in_progress"]
-            },
-            "done": {
-                "count": len(map_status["done"]),
-                "items": map_status["done"]
+        return grouped    
+    
+    def _format_result(self, grouped_tasks) :
+        # return
+        #      {
+        #         "todo": {"count": int, "items": [...]},
+        #         "in_progress": {"count": int, "items": [...]},
+        #         "done": {"count": int, "items": [...]}
+        #     }
+        return {
+            status: {
+                "count": len(tasks),
+                "items": tasks
             }
+            for status, tasks in grouped_tasks.items()
         }
+    
+    def get_tasks_with_connections(self, page_id: str, user_id: str) :
+        # load and merge data sources
+        tasks = self._load_json_tasks()
+        db_rows = repo.find_by_page_user(page_id, user_id)
+        self._merge_db_tasks(tasks, db_rows)
+        
+        # group and format
+        today = datetime.now(timezone.utc)
+        grouped_tasks = self._group_by_status(tasks, today)
 
-        return result
+        return self._format_result(grouped_tasks)
+
 
         
