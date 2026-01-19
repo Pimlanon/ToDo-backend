@@ -6,9 +6,9 @@ class PageRepository:
     def create(self, page: Page):
         db = get_db()
         db.execute("""
-            INSERT INTO pages (id,  user_id, title, created_at)
-            VALUES (?, ?, ?, ?)
-        """, [page.id, page.user_id, page.title, page.created_at])
+            INSERT INTO pages (id, title, created_at)
+            VALUES (?, ?, ?)
+        """, [page.id, page.title, page.created_at])
 
     def update_title(self, page_id:  str, title: str):
         db = get_db()
@@ -18,17 +18,16 @@ class PageRepository:
             WHERE id = ?
         """, [title, page_id])
     
-    def find_all_by_user(self, user_id :str):
+    def find_all(self):
         db = get_db()
         result = db.execute("""
             SELECT * FROM pages
-            WHERE user_id = ?
             ORDER BY created_at ASC
-        """, [user_id])
+        """)
 
         return [Page(**dict(zip(result.columns, row))) for row in result.rows]
 
-    def find_by_page_user(self, page_id: str, user_id :str):
+    def find_by_page(self, page_id: str):
         db = get_db()
         result = db.execute(""" 
             SELECT 
@@ -51,8 +50,7 @@ class PageRepository:
             LEFT JOIN connections c
                 ON tc.connection_id = c.id
             WHERE t.page_id = ?
-            AND p.user_id = ?;
-        """, [page_id, user_id])
+        """, [page_id])
 
         columns = result.columns
         rows = result.rows

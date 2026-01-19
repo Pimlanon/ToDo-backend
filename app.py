@@ -2,7 +2,6 @@ from flask import Flask, jsonify, Blueprint
 from flask_cors import CORS
 from pydantic import ValidationError
 from errors import AppError
-from routes.user_routes import user_bp
 from routes.task_routes import task_bp
 from routes.page_routes import page_bp
 from routes.connection_routes import connection_bp
@@ -13,7 +12,6 @@ CORS(app)
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 
-api_bp.register_blueprint(user_bp, url_prefix="/users")
 api_bp.register_blueprint(task_bp, url_prefix="/tasks")
 api_bp.register_blueprint(page_bp, url_prefix="/pages")
 api_bp.register_blueprint(connection_bp, url_prefix="/connections")

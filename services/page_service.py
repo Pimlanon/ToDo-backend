@@ -16,10 +16,9 @@ class PageService:
         3: "done"
     }
 
-    def create_page(self, user_id: str):
+    def create_page(self):
         page = Page(
             id=str(uuid.uuid4()),
-            user_id=user_id,
             title="Edit Your Board's Name Here !",
             created_at=datetime.utcnow().isoformat(),
         )
@@ -29,8 +28,8 @@ class PageService:
     def update_title(self, page_id: str, title: str):
         return repo.update_title(page_id, title)
     
-    def get_all_by_user(self, user_id :str):
-        pages = repo.find_all_by_user(user_id)
+    def get_all(self):
+        pages = repo.find_all()
         return {
             "count": len(pages),
             "items": [p.to_dict() for p in pages]
@@ -134,10 +133,10 @@ class PageService:
             for status, tasks in grouped_tasks.items()
         }
     
-    def get_tasks_with_connections(self, page_id: str, user_id: str) :
+    def get_tasks_with_connections(self, page_id: str) :
         # load and merge data sources
         tasks = self._load_json_tasks()
-        db_rows = repo.find_by_page_user(page_id, user_id)
+        db_rows = repo.find_by_page(page_id)
         self._merge_db_tasks(tasks, db_rows)
         
         # group and format

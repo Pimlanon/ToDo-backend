@@ -121,11 +121,11 @@ class TaskService:
             "overdue": {
                 "todo": {
                     "count": len(overdue_tasks["todo"]),
-                    "items": overdue_tasks["todo"]
+                    "items": overdue_tasks["todo"][:3]  # only first 3
                 },
                 "in_progress": {
                     "count": len(overdue_tasks["in_progress"]),
-                    "items": overdue_tasks["in_progress"]
+                    "items": overdue_tasks["in_progress"][:3]  # only first 3
                 }
             }
         }

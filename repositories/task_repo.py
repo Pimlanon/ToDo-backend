@@ -60,7 +60,7 @@ class TaskRepository:
             AND status IN (1, 2)
             AND due_date IS NOT NULL
             AND due_date <= ?
-            ORDER BY due_date ASC, created_at DESC
+            ORDER BY due_date DESC
         """, [page_id, today])
 
         columns = result.columns
