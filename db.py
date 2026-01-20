@@ -7,8 +7,6 @@ load_dotenv()
 DATABASE_URL = os.getenv("TURSO_DATABASE_URL")
 AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN")
 
-# DATABASE_URL = DATABASE_URL.replace("libsql://", "https://")
-
 if not DATABASE_URL or not AUTH_TOKEN:
     raise RuntimeError("Turso environment variables are not set")
 

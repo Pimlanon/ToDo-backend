@@ -40,7 +40,7 @@ class PageService:
             return False
         due_utc = datetime.fromisoformat(task["due_date"].replace("Z", "+00:00"))
 
-        # Convert to Thailand time
+        # convert to Thailand time
         due_local = due_utc.astimezone(TH_TZ).date()
         today_local = today.astimezone(TH_TZ).date()
 
@@ -59,7 +59,7 @@ class PageService:
         }
     
     def _build_connection(self, row) :
-        # build connection obj from db
+        """ build connection obj from db """
         return {
             "id": row["connection_id"],
             "name": row["connection_name"],
@@ -68,15 +68,18 @@ class PageService:
         }
     
     def _merge_db_tasks(self, tasks, db_rows) -> None:
-        # merge tasks + connections 
-        # return
-        #      {
-        #         "a1b2c3d <id_task>": {
-        #           "id": str <id_task>,
-        #            ...
-        #           "connections": [{...}]
-        #        }
-        #     }
+        """
+        merge tasks with their connections
+        return a dict in the form:
+        {
+            "<id_task>": {
+                "id": "<id_task>",
+                "title": str,
+                ...
+                "connections": [{...}]
+            }
+        }
+        """
         for row in db_rows:
             task_id = row["id"]
             
@@ -100,13 +103,15 @@ class PageService:
                 )
 
     def _group_by_status(self, tasks, today) :
-        # group by status + mark overdue 
-        # return
-        #      {
-        #         "todo": [{...}],
-        #         "in_progress": [...]},
-        #         "done": [...]}
-        #     }
+        """ 
+        group by status + mark overdue 
+        return
+             {
+                "todo": [{...}],
+                "in_progress": [...]},
+                "done": [...]}
+            } 
+        """
         grouped = {status: [] for status in self.STATUS_MAP.values()}
         
         for task in tasks.values():
@@ -119,12 +124,14 @@ class PageService:
         return grouped    
     
     def _format_result(self, grouped_tasks) :
-        # return
-        #      {
-        #         "todo": {"count": int, "items": [...]},
-        #         "in_progress": {"count": int, "items": [...]},
-        #         "done": {"count": int, "items": [...]}
-        #     }
+        """
+        return
+             {
+                "todo": {"count": int, "items": [...]},
+                "in_progress": {"count": int, "items": [...]},
+                "done": {"count": int, "items": [...]}
+            }
+        """
         return {
             status: {
                 "count": len(tasks),
