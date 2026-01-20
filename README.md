@@ -38,7 +38,6 @@ python-dotenv==1.2.1
 bcrypt
 pytz==2025.2
 email-validator
-gunicorn
 ```
 
 ---
