@@ -1,3 +1,4 @@
+import os
 from flask import Flask, jsonify, Blueprint
 from flask_cors import CORS
 from pydantic import ValidationError
@@ -5,10 +6,20 @@ from errors import AppError
 from routes.task_routes import task_bp
 from routes.page_routes import page_bp
 from routes.connection_routes import connection_bp
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 
-CORS(app)
+CORS(app, resources={
+    r"/*": {
+        "origins": [
+            os.getenv("FRONTEND_URL"),
+            os.getenv("FRONTEND_URL_LOCAL"),
+        ]
+    }
+})
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 
