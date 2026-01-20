@@ -80,8 +80,10 @@ pip install -r requirements.txt
 ### 4. Create `.env` file
 
 ```env
-TURSO_DATABASE_URL=your_turso_url
-TURSO_AUTH_TOKEN=your_turso_token
+TURSO_DATABASE_URL=
+TURSO_AUTH_TOKEN=
+FRONTEND_URL=
+FRONTEND_URL_LOCAL=
 ```
 
 ### 5. Run the server
